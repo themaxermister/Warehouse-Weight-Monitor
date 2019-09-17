@@ -92,12 +92,13 @@ class SerialPort:
 
 # GLOBALS
 serialPort = SerialPort()
+website = "https://wms.shopeemobile.com/ui/#/outbound/review"                   ## TARGET WEBSITE
+x_path = "//*[@id='app']/div[3]/article/div[2]/div[2]/div[3]/form/div/input"    ## TARGET WEB ELEMENT
+com_port = "COM3"
 
 # COOKIES
 path = os.getcwd()
 chrome_cookie_argument = f"{path}/cookies"    ## COOKIES FOLDER
-website = # INSERT WEBSITE URL HERE
-x_path = # INSERT XPATH HERE
 
 capabilities = {
     'chromeOptions': {
@@ -127,43 +128,7 @@ window_position_x = screen_width/2 - window_width/2
 window_position_y = screen_height/2 - window_height/2
 root.geometry('%dx%d+%d+%d' % (window_width, window_height, window_position_x, window_position_y))
 
-# SERIAL DATA CALLBACK
-def OnReceiveSerialData(message):
-    if not serialPort.IsOpen():
-        weightbox.config(text = "RECONNECT & RESTART")
-    else:
-        str_message = message.decode("utf-8")
-        empty = str_message.isspace()
-        if (not empty):
-            print(str_message + "\n")
-            weight = (str_message.split())[-2]
-            weightbox.config(text = weight + " kg")
-            return weight
-
-# # Register the callback above with the serial port object
-serialPort.RegisterReceiveCallback(OnReceiveSerialData)
-6
-
-# # Run main loop once every 200 ms
-def sdterm_main():
-    root.after(200, sdterm_main)
-
-def OpenCommand():
-    global driver
-
-    comport = "COM3"
-    baudrate = 9600
-    serialPort.Open(comport,baudrate)
-
-    if not serialPort.IsOpen():
-        weightbox.config(text = "กรุณาเช็คการเชื่อมต่อสาย") # Port Close
-        OpenCommand()
-
-    else:
-        weightbox.config(text = "ชั่งน้ำหนัก")  # Weight Here
-
-# BUTTON FUNCTIONS
-# # Send data to web UI
+# SEND DATA TO WEB UI
 def SendData(weight):
     global driver
     if serialPort.IsOpen():
@@ -206,8 +171,43 @@ def Close():
         print("Browser not running")
 
     exit()
-    
 
+# SERIAL DATA CALLBACK
+def OnReceiveSerialData(message):
+    if not serialPort.IsOpen():
+        weightbox.config(text = "RECONNECT & RESTART")
+    else:
+        str_message = message.decode("utf-8")
+        empty = str_message.isspace()
+        if (not empty):
+            print(str_message + "\n")
+            weight = (str_message.split())[-2]
+            weightbox.config(text = weight + " kg")
+            SendData(weightbox.cget('text'))
+            return weight
+
+# # Register the callback above with the serial port object
+serialPort.RegisterReceiveCallback(OnReceiveSerialData)
+
+# # Run main loop once every 200 ms
+def sdterm_main():
+    root.after(200, sdterm_main)
+
+def OpenCommand():
+    global driver
+
+    comport = com_port
+    baudrate = 9600
+    serialPort.Open(comport,baudrate)
+
+    if not serialPort.IsOpen():
+        weightbox.config(text = "กรุณาเช็คการเชื่อมต่อสาย") # Port Close
+        OpenCommand()
+
+    else:
+        weightbox.config(text = "ชั่งน้ำหนัก")  # Weight Here
+
+# BUTTON FUNCTIONS
 # UI DESIGN
 # # Labels
 # ## Label box containing weight
@@ -216,15 +216,10 @@ weightbox.config(bg='white', font=('Helvetica', 40))
 weightbox.place(relx=0.5, rely=0.35, anchor=CENTER)
 
 # # Buttons
-# ## Send Data to Web
-button_senddata = Button(root,text="ยืนยัน",width=20,command= lambda: SendData(weightbox.cget('text')))   # Send to Web
-button_senddata.config(font="bold")
-button_senddata.place(relx=0.3, rely=0.6, anchor=CENTER)    
-
 # ## Close Program
 button_close = Button(root,text="ออก",width=20,command=Close)  # Exit
 button_close.config(font="bold")
-button_close.place(relx=0.7, rely=0.6, anchor=CENTER)
+button_close.place(relx=0.5, rely=0.6, anchor=CENTER)
 
 
 # MAIN FUNCTION
