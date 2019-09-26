@@ -91,9 +91,13 @@ class SerialPort:
             return False
 
 # GLOBALS
+## Test Values
+## website = "https://www.google.com/"
+## x_path =   "//*[@id='tsf']/div[2]/div[1]/div[1]/div/div[2]/input"
+
 serialPort = SerialPort()
-website = "https://wms.shopeemobile.com/ui/#/outbound/review"                   ## TARGET WEBSITE
-x_path = "//*[@id='app']/div[3]/article/div[2]/div[2]/div[3]/form/div/input"    ## TARGET WEB ELEMENT
+website =   ## TARGET WEBSITE
+x_path =    ## TARGET WEB ELEMENT
 com_port = "COM3"
 
 # COOKIES
@@ -172,6 +176,18 @@ def Close():
 
     exit()
 
+# CHECK STRING FORMAT
+def check_format(output):
+    str_form = re.search("1,ST,     (.+?),       0.000,         0,kg", output)
+    if str_form:
+        found = str_form.group(1)
+        return found
+
+    str_form2 = re.search('GROSS(.+?)kg', output)
+    if str_form2:
+        found = str_form2.group(1)
+        return found
+
 # SERIAL DATA CALLBACK
 def OnReceiveSerialData(message):
     if not serialPort.IsOpen():
@@ -181,7 +197,7 @@ def OnReceiveSerialData(message):
         empty = str_message.isspace()
         if (not empty):
             print(str_message + "\n")
-            weight = (str_message.split())[-2]
+            weight = (check_format(str_message)).replace(" ", "")
             weightbox.config(text = weight + " kg")
             SendData(weightbox.cget('text'))
             return weight
@@ -220,7 +236,6 @@ weightbox.place(relx=0.5, rely=0.35, anchor=CENTER)
 button_close = Button(root,text="ออก",width=20,command=Close)  # Exit
 button_close.config(font="bold")
 button_close.place(relx=0.5, rely=0.6, anchor=CENTER)
-
 
 # MAIN FUNCTION
 OpenCommand()
