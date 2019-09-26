@@ -1,3 +1,5 @@
+## Warehouse Weight Monitor v1.02
+
 import os
 import sys
 import serial
