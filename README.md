@@ -1,4 +1,4 @@
-# Warehouse Weight Monitor v1.01
+# Warehouse Weight Monitor v1.02
 
 Python program that can connects to USB scale via serial connection. Able to receive sent data from scale and display captured reading on the Python GUI. User can insert data into website via xPath.
 
